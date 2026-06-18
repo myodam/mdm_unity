@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using MdmUnity.Missions;
@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Mediapipe.Unity.Sample.PoseLandmarkDetection
 {
-  public class MissionPoseRequestBuilder : MonoBehaviour, IMissionPoseCapture
+  public class MissionPoseRequestBuilder : MonoBehaviour, IMissionPoseCapture, IMissionPoseLandmarkSource
   {
     private const int LeftShoulderIndex = 11;
     private const int RightShoulderIndex = 12;
@@ -107,6 +107,24 @@ namespace Mediapipe.Unity.Sample.PoseLandmarkDetection
       Debug.Log($"MissionPoseRequestBuilder: pose capture started. duration={_captureDurationSec}, sampleFps={_sampleFps}");
     }
 
+    public bool TryGetLatestPoseFrame(out MissionPoseFrame poseFrame)
+    {
+      poseFrame = default;
+
+      LandmarkSet landmarkSet;
+      lock (_landmarkLock)
+      {
+        if (!_hasLatestLandmarks)
+        {
+          return false;
+        }
+
+        landmarkSet = _latestLandmarks;
+      }
+
+      poseFrame = CreatePoseFrame(0.0f, landmarkSet);
+      return true;
+    }
     private void HandlePoseLandmarksDetected(PoseLandmarkerResult result)
     {
       if (!TryCreateLandmarkSet(result, out var landmarkSet))
@@ -160,6 +178,22 @@ namespace Mediapipe.Unity.Sample.PoseLandmarkDetection
       }
     }
 
+    private MissionPoseFrame CreatePoseFrame(float elapsedTime, LandmarkSet landmarkSet)
+    {
+      return new MissionPoseFrame
+      {
+        timestamp = (float)Math.Round(elapsedTime, 3),
+        landmarks = new MissionPoseLandmarks
+        {
+          leftShoulder = landmarkSet.LeftShoulder,
+          rightShoulder = landmarkSet.RightShoulder,
+          leftElbow = landmarkSet.LeftElbow,
+          rightElbow = landmarkSet.RightElbow,
+          leftWrist = landmarkSet.LeftWrist,
+          rightWrist = landmarkSet.RightWrist,
+        },
+      };
+    }
     private void CompleteCapture()
     {
       _isCapturing = false;

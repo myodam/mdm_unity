@@ -1,6 +1,7 @@
+﻿using System.Collections;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
-using System.Collections;
 
 public class SceneSequence : MonoBehaviour
 {
@@ -11,77 +12,132 @@ public class SceneSequence : MonoBehaviour
     [Header("Story Images")]
     public Sprite[] storySprites;
 
-    private int currentIndex = 0;
-    private Coroutine sequenceCoroutine;
+    [Header("Sequence Settings")]
+    [SerializeField] private bool _playOnStart = true;
+    [SerializeField] private CanvasGroup _fadeCanvasGroup;
+    [SerializeField] private bool _fadeInAfterSequence = true;
+    [Min(0.0f)] [SerializeField] private float _fadeInDurationSec = 1.0f;
+    [SerializeField] private UnityEvent _sequenceCompleted;
 
-    void Start()
+    private int _currentIndex = 0;
+    private Coroutine _sequenceCoroutine;
+    private bool _hasPlayed = false;
+
+    private void Start()
     {
-        // 씬 시작 시 이미지를 가려둡니다.
-        // Canvas 전체가 아니라 Image 오브젝트를 가려야 버튼이 보입니다.
         if (sequenceCanvas != null)
         {
             sequenceCanvas.SetActive(false);
+        }
+
+        InitializeFade();
+
+        if (_playOnStart)
+        {
+            StartSequence();
         }
     }
 
     public void StartSequence()
     {
-        Debug.Log("StartSequence() 버튼이 클릭되었습니다!");
+        if (_hasPlayed)
+        {
+            return;
+        }
 
         if (storySprites == null || storySprites.Length == 0)
         {
-            Debug.LogError("스토리 이미지가 등록되지 않았습니다! Inspector에서 Story Sprites에 이미지를 넣어주세요.");
+            Debug.LogError("SceneSequence: Story sprites are missing.");
             return;
         }
 
         if (displayImage == null)
         {
-            Debug.LogError("Display Image가 등록되지 않았습니다!");
+            Debug.LogError("SceneSequence: Display image reference is missing.");
             return;
         }
 
-        if (sequenceCoroutine != null)
+        if (_sequenceCoroutine != null)
         {
-            StopCoroutine(sequenceCoroutine);
+            StopCoroutine(_sequenceCoroutine);
         }
-        sequenceCoroutine = StartCoroutine(PlaySequence());
+
+        _hasPlayed = true;
+        _sequenceCoroutine = StartCoroutine(PlaySequence());
     }
 
     private IEnumerator PlaySequence()
     {
-        Debug.Log("이미지 시퀀스 재생 시작");
-
         if (sequenceCanvas != null)
         {
             sequenceCanvas.SetActive(true);
         }
 
-        for (currentIndex = 0; currentIndex < storySprites.Length; currentIndex++)
+        for (_currentIndex = 0; _currentIndex < storySprites.Length; _currentIndex++)
         {
-            displayImage.sprite = storySprites[currentIndex];
-            
-            bool isLastImage = (currentIndex == storySprites.Length - 1);
+            displayImage.sprite = storySprites[_currentIndex];
+
+            bool isLastImage = _currentIndex == storySprites.Length - 1;
             float waitTime = isLastImage ? 2.0f : 1.5f;
 
-            Debug.Log($"{currentIndex + 1}번째 이미지 표시 중... ({waitTime}초 대기)");
             yield return new WaitForSeconds(waitTime);
         }
 
-        Debug.Log("시퀀스 종료");
-        EndSequence();
+        yield return EndSequenceRoutine();
     }
 
-    private void EndSequence()
+    private IEnumerator EndSequenceRoutine()
     {
-        if (sequenceCoroutine != null)
-        {
-            StopCoroutine(sequenceCoroutine);
-            sequenceCoroutine = null;
-        }
+        _sequenceCoroutine = null;
 
         if (sequenceCanvas != null)
         {
             sequenceCanvas.SetActive(false);
         }
+
+        if (_fadeInAfterSequence)
+        {
+            yield return FadeInRoutine();
+        }
+
+        _sequenceCompleted?.Invoke();
+    }
+
+    private void InitializeFade()
+    {
+        if (_fadeCanvasGroup == null)
+        {
+            return;
+        }
+
+        _fadeCanvasGroup.alpha = 0.0f;
+        _fadeCanvasGroup.interactable = false;
+        _fadeCanvasGroup.blocksRaycasts = false;
+    }
+
+    private IEnumerator FadeInRoutine()
+    {
+        if (_fadeCanvasGroup == null)
+        {
+            yield break;
+        }
+
+        _fadeCanvasGroup.alpha = 1.0f;
+        _fadeCanvasGroup.interactable = true;
+        _fadeCanvasGroup.blocksRaycasts = true;
+
+        float elapsedTime = 0.0f;
+        float duration = Mathf.Max(0.001f, _fadeInDurationSec);
+
+        while (elapsedTime < duration)
+        {
+            elapsedTime += Time.deltaTime;
+            _fadeCanvasGroup.alpha = Mathf.Lerp(1.0f, 0.0f, elapsedTime / duration);
+            yield return null;
+        }
+
+        _fadeCanvasGroup.alpha = 0.0f;
+        _fadeCanvasGroup.interactable = false;
+        _fadeCanvasGroup.blocksRaycasts = false;
     }
 }
