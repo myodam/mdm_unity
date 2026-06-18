@@ -47,6 +47,9 @@ namespace MdmUnity.Missions
         [SerializeField] private Texture2D _endingTexture;
         [SerializeField] private VoiceLineEntry[] _voiceLines;
         [Range(0.0f, 2.0f)] [SerializeField] private float _voiceVolume = 1.0f;
+        [SerializeField] private AudioClip _sceneBgmClip;
+        [SerializeField] private AudioClip _endingBgmClip;
+        [Range(0.0f, 1.0f)] [SerializeField] private float _bgmVolume = 0.5f;
         [SerializeField] private SceneMissionEntry[] _sceneMissions;
         [SerializeField] private bool _requestBeforeMissionOnStart = true;
         [SerializeField] private bool _quitOnEnding = true;
@@ -63,6 +66,7 @@ namespace MdmUnity.Missions
         private CanvasGroup _endingImageCanvasGroup;
         private RawImage _endingRawImage;
         private AudioSource _voiceAudioSource;
+        private AudioSource _bgmAudioSource;
         private Coroutine _actionCoroutine;
 
         private void Awake()
@@ -81,6 +85,8 @@ namespace MdmUnity.Missions
             ApplyCurrentMissionDefinition();
             InitializeFade();
             InitializeVoiceAudioSource();
+            InitializeBgmAudioSource();
+            PlaySceneBgm();
         }
 
         private void OnEnable()
@@ -208,6 +214,50 @@ namespace MdmUnity.Missions
             _voiceAudioSource.dopplerLevel = 0.0f;
         }
 
+        private void InitializeBgmAudioSource()
+        {
+            if (_bgmAudioSource == null)
+            {
+                _bgmAudioSource = gameObject.AddComponent<AudioSource>();
+            }
+
+            _bgmAudioSource.playOnAwake = false;
+            _bgmAudioSource.loop = true;
+            _bgmAudioSource.spatialBlend = 0.0f;
+            _bgmAudioSource.dopplerLevel = 0.0f;
+            _bgmAudioSource.volume = _bgmVolume;
+        }
+
+        private void PlaySceneBgm()
+        {
+            PlayBgm(_sceneBgmClip);
+        }
+
+        private void PlayEndingBgm()
+        {
+            PlayBgm(_endingBgmClip);
+        }
+
+        private void PlayBgm(AudioClip clip)
+        {
+            if (clip == null)
+            {
+                return;
+            }
+
+            InitializeBgmAudioSource();
+            if (_bgmAudioSource.clip == clip && _bgmAudioSource.isPlaying)
+            {
+                _bgmAudioSource.volume = _bgmVolume;
+                return;
+            }
+
+            _bgmAudioSource.Stop();
+            _bgmAudioSource.clip = clip;
+            _bgmAudioSource.volume = _bgmVolume;
+            _bgmAudioSource.loop = true;
+            _bgmAudioSource.Play();
+        }
         private AudioClip FindVoiceClip(string message)
         {
             if (_voiceLines == null || string.IsNullOrWhiteSpace(message))
@@ -338,6 +388,7 @@ namespace MdmUnity.Missions
             }
 
             yield return FadeOutRoutine(_endingFadeDurationSec);
+            PlayEndingBgm();
 
             if (_endingTexture != null)
             {

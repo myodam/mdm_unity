@@ -2387,6 +2387,9 @@ MonoBehaviour:
   - _message: 성공이에요! 이 씨앗은 어떤 열매의 씨앗일까요?
     _clip: {fileID: 8300000, guid: 151c4f5868c0a6545af4e7c69d9f2544, type: 3}
   _voiceVolume: 1
+  _sceneBgmClip: {fileID: 8300000, guid: 983631ac936e53f4d8342724e1cce382, type: 3}
+  _endingBgmClip: {fileID: 0}
+  _bgmVolume: 0.5
   _sceneMissions:
   - _sceneId: scene_003
     _unitySceneName: Scene_03

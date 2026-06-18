@@ -217,7 +217,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &111041495
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2275,6 +2275,9 @@ MonoBehaviour:
       \uC3DF\uC544\uC838 \uB098\uC640\uC694!"
     _clip: {fileID: 8300000, guid: 04938df1c47392b42b1318362691df38, type: 3}
   _voiceVolume: 1
+  _sceneBgmClip: {fileID: 8300000, guid: 20df37d6c1345f748bb86b773580e4cc, type: 3}
+  _endingBgmClip: {fileID: 8300000, guid: 0d3613473362f224d8f94363ace66fe7, type: 3}
+  _bgmVolume: 0.5
   _sceneMissions: []
   _requestBeforeMissionOnStart: 0
   _quitOnEnding: 1

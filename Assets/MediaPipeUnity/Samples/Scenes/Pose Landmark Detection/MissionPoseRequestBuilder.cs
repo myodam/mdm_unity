@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using MdmUnity.Missions;
@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Mediapipe.Unity.Sample.PoseLandmarkDetection
 {
-  public class MissionPoseRequestBuilder : MonoBehaviour, IMissionPoseCapture, IMissionPoseLandmarkSource
+  public class MissionPoseRequestBuilder : MonoBehaviour, IMissionPoseCapture, MdmUnity.Missions.IMissionPoseLandmarkSource
   {
     private const int LeftShoulderIndex = 11;
     private const int RightShoulderIndex = 12;
