@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace MdmUnity.Missions
 {
@@ -7,6 +7,7 @@ namespace MdmUnity.Missions
     {
         public string storyId;
         public string sceneId;
+        public bool beforeMission;
         public string missionType;
         public int captureDurationSec;
         public int sampleFps;
