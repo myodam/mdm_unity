@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2023 homuler
+// Copyright (c) 2023 homuler
 //
 // Use of this source code is governed by an MIT-style
 // license that can be found in the LICENSE file or at
@@ -58,11 +58,17 @@ namespace Mediapipe.Unity.Sample.PoseLandmarkDetection
       // TODO: When using GpuBuffer, MediaPipe assumes that the input format is BGRA, so maybe the following code needs to be fixed.
       _textureFramePool = new Experimental.TextureFramePool(imageSource.textureWidth, imageSource.textureHeight, TextureFormat.RGBA32, 10);
 
-      // NOTE: The screen will be resized later, keeping the aspect ratio.
-      screen.Initialize(imageSource);
+      if (screen != null)
+      {
+        // NOTE: The screen will be resized later, keeping the aspect ratio.
+        screen.Initialize(imageSource);
+      }
 
-      SetupAnnotationController(_poseLandmarkerResultAnnotationController, imageSource);
-      _poseLandmarkerResultAnnotationController.InitScreen(imageSource.textureWidth, imageSource.textureHeight);
+      if (_poseLandmarkerResultAnnotationController != null)
+      {
+        SetupAnnotationController(_poseLandmarkerResultAnnotationController, imageSource);
+        _poseLandmarkerResultAnnotationController.InitScreen(imageSource.textureWidth, imageSource.textureHeight);
+      }
 
       var transformationOptions = imageSource.GetTransformationOptions();
       var flipHorizontally = transformationOptions.flipHorizontally;
@@ -135,12 +141,12 @@ namespace Mediapipe.Unity.Sample.PoseLandmarkDetection
           case Tasks.Vision.Core.RunningMode.IMAGE:
             if (taskApi.TryDetect(image, imageProcessingOptions, ref result))
             {
-              _poseLandmarkerResultAnnotationController.DrawNow(result);
+              _poseLandmarkerResultAnnotationController?.DrawNow(result);
               NotifyPoseLandmarksDetected(result);
             }
             else
             {
-              _poseLandmarkerResultAnnotationController.DrawNow(default);
+              _poseLandmarkerResultAnnotationController?.DrawNow(default);
               NotifyPoseLandmarksDetected(default);
             }
             DisposeAllMasks(result);
@@ -148,12 +154,12 @@ namespace Mediapipe.Unity.Sample.PoseLandmarkDetection
           case Tasks.Vision.Core.RunningMode.VIDEO:
             if (taskApi.TryDetectForVideo(image, GetCurrentTimestampMillisec(), imageProcessingOptions, ref result))
             {
-              _poseLandmarkerResultAnnotationController.DrawNow(result);
+              _poseLandmarkerResultAnnotationController?.DrawNow(result);
               NotifyPoseLandmarksDetected(result);
             }
             else
             {
-              _poseLandmarkerResultAnnotationController.DrawNow(default);
+              _poseLandmarkerResultAnnotationController?.DrawNow(default);
               NotifyPoseLandmarksDetected(default);
             }
             DisposeAllMasks(result);
@@ -167,7 +173,7 @@ namespace Mediapipe.Unity.Sample.PoseLandmarkDetection
 
     private void OnPoseLandmarkDetectionOutput(PoseLandmarkerResult result, Image image, long timestamp)
     {
-      _poseLandmarkerResultAnnotationController.DrawLater(result);
+      _poseLandmarkerResultAnnotationController?.DrawLater(result);
       NotifyPoseLandmarksDetected(result);
       DisposeAllMasks(result);
     }
