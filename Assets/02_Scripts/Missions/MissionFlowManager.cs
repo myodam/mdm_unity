@@ -15,6 +15,13 @@ namespace MdmUnity.Missions
         private const string RetryAction = "RETRY";
         private const string NextSceneAction = "NEXT_SCENE";
         private const string EndingAction = "ENDING";
+        private static readonly string[] EndingStoppedFxNames =
+        {
+            "BirdChirping",
+            "BirdFlying",
+            "BookOpen",
+            "Sawing"
+        };
 
         [Serializable]
         private class SceneMissionEntry
@@ -393,6 +400,7 @@ namespace MdmUnity.Missions
             if (_endingTexture != null)
             {
                 PrepareEndingImage();
+                StopEndingFxAudioSources();
                 yield return FadeCanvasGroupRoutine(_endingImageCanvasGroup, 0.0f, 1.0f, _endingImageFadeDurationSec);
                 yield return new WaitForSeconds(_endingImageDisplayDurationSec);
             }
@@ -462,6 +470,49 @@ namespace MdmUnity.Missions
             _endingImageCanvasGroup.alpha = 0.0f;
             _endingImageCanvasGroup.blocksRaycasts = false;
             _endingImageCanvasGroup.interactable = false;
+        }
+
+        private void StopEndingFxAudioSources()
+        {
+            AudioSource[] audioSources = FindObjectsByType<AudioSource>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+            for (int i = 0; i < audioSources.Length; i++)
+            {
+                AudioSource audioSource = audioSources[i];
+                if (audioSource == null || audioSource == _bgmAudioSource || audioSource == _voiceAudioSource)
+                {
+                    continue;
+                }
+
+                if (!audioSource.isPlaying || !IsEndingFxAudioSource(audioSource))
+                {
+                    continue;
+                }
+
+                audioSource.Stop();
+            }
+        }
+
+        private bool IsEndingFxAudioSource(AudioSource audioSource)
+        {
+            if (audioSource == null)
+            {
+                return false;
+            }
+
+            string clipName = audioSource.clip != null ? audioSource.clip.name : string.Empty;
+            string objectName = audioSource.gameObject != null ? audioSource.gameObject.name : string.Empty;
+
+            for (int i = 0; i < EndingStoppedFxNames.Length; i++)
+            {
+                string fxName = EndingStoppedFxNames[i];
+                if (string.Equals(clipName, fxName, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(objectName, fxName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private SceneMissionEntry FindSceneMissionEntry(string sceneId)
