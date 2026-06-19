@@ -1,8 +1,9 @@
-{
+﻿{
     "name": "Mediapipe.Unity.Sample",
     "rootNamespace": "",
     "references": [
-        "GUID:04c4d86a70aa56c55a78c61f1ab1a56d"
+        "GUID:04c4d86a70aa56c55a78c61f1ab1a56d",
+        "GUID:9d8acb6d3a7546c4a9ad1f29a6f5d2c1"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

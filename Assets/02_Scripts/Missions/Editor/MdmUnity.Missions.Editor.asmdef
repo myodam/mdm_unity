@@ -1,0 +1,18 @@
+{
+    "name": "MdmUnity.Missions.Editor",
+    "rootNamespace": "MdmUnity.Missions.Editor",
+    "references": [
+        "GUID:9d8acb6d3a7546c4a9ad1f29a6f5d2c1"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
